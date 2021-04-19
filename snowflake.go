@@ -97,7 +97,40 @@ type ID int64
 
 // NewNode returns a new snowflake node that can be used to generate snowflake
 // IDs
-func NewNode(node, step int64) (*Node, error) {
+func New(node, step int64) (*Node, error) {
+
+	// re-calc in case custom NodeBits or StepBits were set
+	// DEPRECATED: the below block will be removed in a future release.
+	mu.Lock()
+	nodeMax = -1 ^ (-1 << NodeBits)
+	nodeMask = nodeMax << StepBits
+	stepMask = -1 ^ (-1 << StepBits)
+	timeShift = NodeBits + StepBits
+	nodeShift = StepBits
+	mu.Unlock()
+
+	n := Node{}
+	n.node = node
+	n.nodeMax = -1 ^ (-1 << NodeBits)
+	n.nodeMask = n.nodeMax << StepBits
+	n.stepMask = -1 ^ (-1 << StepBits)
+	n.timeShift = NodeBits + StepBits
+	n.nodeShift = StepBits
+
+	if n.node < 0 || n.node > n.nodeMax {
+		return nil, errors.New("Node number must be between 0 and " + strconv.FormatInt(n.nodeMax, 10))
+	}
+
+	var curTime = time.Now()
+	// add time.Duration to curTime to make sure we use the monotonic clock if available
+	n.epoch = curTime.Add(time.Unix(Epoch/1000, (Epoch%1000)*1000000).Sub(curTime))
+
+	return &n, nil
+}
+
+// NewNode returns a new snowflake node that can be used to generate snowflake
+// IDs
+func NewNode(node int64) (*Node, error) {
 
 	// re-calc in case custom NodeBits or StepBits were set
 	// DEPRECATED: the below block will be removed in a future release.
