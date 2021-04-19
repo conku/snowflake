@@ -97,7 +97,7 @@ type ID int64
 
 // NewNode returns a new snowflake node that can be used to generate snowflake
 // IDs
-func NewNode(node int64) (*Node, error) {
+func NewNode(node, step int64) (*Node, error) {
 
 	// re-calc in case custom NodeBits or StepBits were set
 	// DEPRECATED: the below block will be removed in a future release.
