@@ -111,6 +111,7 @@ func New(node, step int64) (*Node, error) {
 
 	n := Node{}
 	n.node = node
+	n.step = step
 	n.nodeMax = -1 ^ (-1 << NodeBits)
 	n.nodeMask = n.nodeMax << StepBits
 	n.stepMask = -1 ^ (-1 << StepBits)
